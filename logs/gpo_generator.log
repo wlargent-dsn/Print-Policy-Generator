@@ -1,7 +1,0 @@
-2026-05-05 15:41:50 - INFO - Starting Automatic Print GPO Generator
-2026-05-05 15:42:11 - ERROR - Failed to poll server DSN-PRINT-01: Failed to poll server DSN-PRINT-01: PowerShell script failed: Unknown error
-2026-05-05 15:42:11 - ERROR - Failed to send SMTP alert: [Errno 11001] getaddrinfo failed
-2026-05-05 15:42:11 - INFO - Generated XML with 0 printers
-2026-05-05 15:42:11 - INFO - GPO XML written to Printers.xml
-2026-05-05 15:42:11 - WARNING - Some servers failed to poll, but XML generated from database
-2026-05-05 15:42:11 - INFO - Automatic Print GPO Generator completed successfully

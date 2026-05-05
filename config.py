@@ -25,7 +25,7 @@ class Config:
             raise ValueError("Configuration file is empty or invalid YAML")
 
         # Validate required sections
-        required_sections = ['site_mappings', 'print_servers', 'gpo_xml_path', 'logging', 'smtp']
+        required_sections = ['site_mappings', 'print_servers', 'gpo_xml_path', 'logging']
         for section in required_sections:
             if section not in config:
                 raise ValueError(f"Missing required configuration section: {section}")
@@ -52,18 +52,24 @@ class Config:
         if not isinstance(self.log_rotation_days, int) or self.log_rotation_days <= 0:
             raise ValueError("rotation_days must be a positive integer")
 
-        # Load SMTP config
-        smtp_config = config['smtp']
-        self.smtp_server: str = smtp_config['server']
-        self.smtp_port: int = smtp_config['port']
-        self.smtp_from_email: str = smtp_config['from_email']
-        self.smtp_to_email: str = smtp_config['to_email']
+        # Load SMTP config (optional)
+        if 'smtp' in config and config['smtp'] is not None:
+            smtp_config = config['smtp']
+            self.smtp_server: str = smtp_config['server']
+            self.smtp_port: int = smtp_config['port']
+            self.smtp_from_email: str = smtp_config['from_email']
+            self.smtp_to_email: str = smtp_config['to_email']
 
-        # Validate SMTP settings
-        if not all(isinstance(x, str) for x in [self.smtp_server, self.smtp_from_email, self.smtp_to_email]):
-            raise ValueError("SMTP server, from_email, and to_email must be strings")
-        if not isinstance(self.smtp_port, int) or not (1 <= self.smtp_port <= 65535):
-            raise ValueError("SMTP port must be an integer between 1 and 65535")
+            # Validate SMTP settings
+            if not all(isinstance(x, str) for x in [self.smtp_server, self.smtp_from_email, self.smtp_to_email]):
+                raise ValueError("SMTP server, from_email, and to_email must be strings")
+            if not isinstance(self.smtp_port, int) or not (1 <= self.smtp_port <= 65535):
+                raise ValueError("SMTP port must be an integer between 1 and 65535")
+        else:
+            self.smtp_server = None
+            self.smtp_port = None
+            self.smtp_from_email = None
+            self.smtp_to_email = None
 
         # Load printer overrides (optional)
         self.printer_overrides: Dict[str, str] = config.get('printer_overrides') or {}

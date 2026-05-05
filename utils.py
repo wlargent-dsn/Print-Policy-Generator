@@ -42,6 +42,10 @@ def setup_logging(config: Config) -> logging.Logger:
 
 def send_smtp_alert(config: Config, subject: str, message: str, logger: logging.Logger):
     """Send SMTP alert email."""
+    if not config.smtp_server:
+        logger.warning("SMTP not configured, skipping alert")
+        return
+
     try:
         msg = MIMEText(message)
         msg['Subject'] = subject

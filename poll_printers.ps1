@@ -11,11 +11,18 @@ try {
     # Query printers from the server
     $printers = Get-Printer -ComputerName $ServerName -ErrorAction Stop
 
+    # Get all printer ports at once for efficiency
+    $ports = Get-PrinterPort -ComputerName $ServerName -ErrorAction SilentlyContinue
+    $portsHash = @{}
+    foreach ($p in $ports) {
+        $portsHash[$p.Name] = $p
+    }
+
     $result = @()
 
     foreach ($printer in $printers) {
-        # Get printer port to find IP address
-        $port = Get-PrinterPort -ComputerName $ServerName -Name $printer.PortName -ErrorAction SilentlyContinue
+        # Get printer port from hash
+        $port = $portsHash[$printer.PortName]
 
         $printerData = @{
             hostname = $ServerName

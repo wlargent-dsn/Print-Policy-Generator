@@ -128,16 +128,10 @@ def generate_gpo_xml(db: Database, config: Config, logger) -> str:
         uid = printer.uid
         clsid = printer.clsid
 
-        xml = f'''\t<SharedPrinter clsid="{{{clsid}}}" name="{name}" status="{name}" image="2" changed="{timestamp}" uid="{{{uid}}}" bypassErrors="1">
-\t\t<Properties action="U" comment="" path="{unc}" location="" default="0" skipLocal="0" deleteAll="0" persistent="0" deleteMaps="0" port=""/>
-\t\t<Filters><FilterSite bool="AND" not="0" name="{adds_site}"/></Filters>
-\t</SharedPrinter>'''
+        xml = f'''<SharedPrinter clsid="{{{clsid}}}" name="{name}" status="{name}" image="2" bypassErrors="1" changed="{timestamp}" uid="{{{uid}}}"><Properties action="U" comment="" path="{unc}" location="" default="0" skipLocal="0" deleteAll="0" persistent="0" deleteMaps="0" port=""/><Filters><FilterSite bool="AND" not="0" name="{adds_site}"/></Filters></SharedPrinter>'''
         xml_entries.append(xml)
 
-    full_xml = f'''<?xml version="1.0" encoding="utf-8"?>
-<Printers clsid="{{1F577D12-3D1B-471e-A1B7-060317597B9C}}">
-{chr(10).join(xml_entries)}
-</Printers>'''
+    full_xml = f'''<?xml version="1.0" encoding="utf-8"?>\n<Printers clsid="{{1F577D12-3D1B-471e-A1B7-060317597B9C}}">\n{chr(10).join(xml_entries)}\n</Printers>'''
 
     logger.info(f"Generated XML with {len(printers)} printers")
     return full_xml

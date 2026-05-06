@@ -29,3 +29,9 @@ smtp:
 # Maps printer name to specific ADDS site, overriding prefix-based determination
 printer_overrides:
   # "SPECIAL-PRINTER": "MIAMI"  # Uncomment and modify as needed
+
+# Printer skip patterns (optional)
+# List of wildcard patterns to skip printers by name
+skip_printers:
+  # - "*test*"
+  # - "old-*"

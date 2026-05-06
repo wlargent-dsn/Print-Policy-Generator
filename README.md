@@ -40,6 +40,7 @@ Edit `config.yaml` to customize:
 - **smtp**: Email alert settings (server, port, addresses)
 - **logging**: Log directory and rotation settings
 - **printer_overrides**: Per-printer site overrides
+- **skip_printers**: List of wildcard patterns to skip printers by name
 
 ## Scheduling
 

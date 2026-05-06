@@ -76,6 +76,11 @@ class Config:
         if not isinstance(self.printer_overrides, dict):
             raise ValueError("printer_overrides must be a dictionary")
 
+        # Load printer skip patterns (optional)
+        self.skip_patterns: List[str] = config.get('skip_printers', [])
+        if not isinstance(self.skip_patterns, list):
+            raise ValueError("skip_printers must be a list")
+
     def get_site_for_printer(self, printer_name: str) -> Optional[str]:
         """Determine ADDS site for a printer based on name prefix or override."""
         # Check overrides first

@@ -7,6 +7,7 @@ Main script that polls print servers, updates database, and generates GPO XML.
 import json
 import subprocess
 import sys
+import fnmatch
 from datetime import datetime
 from typing import List, Dict, Any
 from config import Config
@@ -59,6 +60,12 @@ def update_database_from_poll(db: Database, config: Config, server_data: List[Di
 
     for printer_data in server_data:
         printer_name = printer_data['name']
+
+        # Check skip patterns
+        if any(fnmatch.fnmatch(printer_name, pattern) for pattern in config.skip_patterns):
+            logger.info(f"Skipping printer {printer_name} due to skip pattern")
+            continue
+
         server_printer_names.add(printer_name)
 
         # Determine site

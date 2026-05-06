@@ -126,7 +126,7 @@ def generate_gpo_xml(db: Database, config: Config, logger) -> str:
         unc = xml_escape(printer.printer_unc)
         adds_site = xml_escape(printer.adds_site)
         uid = printer.uid
-        clsid = printer.clsid
+        clsid = "9A5E9697-9095-436d-A0EE-4D128FDFBCE5"
 
         xml = f'''<SharedPrinter clsid="{{{clsid}}}" name="{name}" status="{name}" image="2" bypassErrors="1" changed="{timestamp}" uid="{{{uid}}}"><Properties action="U" comment="" path="{unc}" location="" default="0" skipLocal="0" deleteAll="0" persistent="0" deleteMaps="0" port=""/><Filters><FilterSite bool="AND" not="0" name="{adds_site}"/></Filters></SharedPrinter>'''
         xml_entries.append(xml)

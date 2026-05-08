@@ -7,6 +7,7 @@ from logging.handlers import TimedRotatingFileHandler
 import smtplib
 from email.mime.text import MIMEText
 import os
+import socket
 from config import Config
 
 
@@ -47,7 +48,17 @@ def send_smtp_alert(config: Config, subject: str, message: str, logger: logging.
         return
 
     try:
-        msg = MIMEText(message)
+        # Get system information
+        hostname = socket.gethostname()
+        script_path = os.path.abspath(__file__)
+
+        # Prepend system information to message
+        enhanced_message = f"""System: {hostname}
+Script: {script_path}
+
+{message}"""
+
+        msg = MIMEText(enhanced_message)
         msg['Subject'] = subject
         msg['From'] = config.smtp_from_email
         msg['To'] = config.smtp_to_email

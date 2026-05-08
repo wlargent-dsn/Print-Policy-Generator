@@ -63,11 +63,15 @@ Script: {script_path}
         msg['From'] = config.smtp_from_email
         msg['To'] = config.smtp_to_email
 
-        with smtplib.SMTP(config.smtp_server, config.smtp_port) as server:
+        # Set timeout to prevent hanging on unreachable mail server (default 10 seconds)
+        with smtplib.SMTP(config.smtp_server, config.smtp_port, timeout=10) as server:
             server.sendmail(config.smtp_from_email, config.smtp_to_email, msg.as_string())
 
         logger.info(f"SMTP alert sent: {subject}")
 
+    except socket.timeout:
+        logger.error(f"SMTP timeout connecting to {config.smtp_server}:{config.smtp_port} - mail server unreachable/slow")
+        # Don't raise, as this is non-critical for main script execution
     except Exception as e:
         logger.error(f"Failed to send SMTP alert: {e}")
         # Don't raise, as this might cause infinite loop if alerting about alert failure

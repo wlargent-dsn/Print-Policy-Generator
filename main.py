@@ -8,11 +8,17 @@ import json
 import subprocess
 import sys
 import fnmatch
+import signal
 from datetime import datetime
 from typing import List, Dict, Any
 from config import Config
 from database import Database
 from utils import setup_logging, send_smtp_alert
+
+
+def timeout_handler(signum, frame):
+    """Handle timeout signal."""
+    raise TimeoutError("Script execution exceeded maximum allowed time (5 minutes)")
 
 
 def poll_server(server_name: str, logger) -> List[Dict[str, Any]]:
@@ -146,6 +152,11 @@ def generate_gpo_xml(db: Database, config: Config, logger) -> str:
 
 def main():
     """Main execution function."""
+    # Set timeout to 5 minutes (300 seconds) to prevent hanging
+    if sys.platform != 'win32':
+        signal.signal(signal.SIGALRM, timeout_handler)
+        signal.alarm(300)
+    
     try:
         # Load configuration
         config = Config()
@@ -197,6 +208,11 @@ def main():
         print(f"Fatal error: {e}", file=sys.stderr)
         # Can't send alert here as config might not be loaded
         sys.exit(1)
+    
+    finally:
+        # Clear timeout alarm on non-Windows systems
+        if sys.platform != 'win32':
+            signal.alarm(0)
 
 
 if __name__ == "__main__":

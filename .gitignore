@@ -2,3 +2,4 @@ __pycache__/
 config.yaml
 logs/
 printers.db
+run_start.log

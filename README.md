@@ -62,6 +62,36 @@ The script uses `printers.db` SQLite database to store:
 
 Logs are written to `logs/gpo_generator.log` with rotation every 30 days (configurable).
 
+### Batch Script Logging
+
+When run via Task Scheduler, the batch script (`run.bat`) logs all output to timestamped files in the `logs/` directory:
+
+- **Log files**: `logs/run_YYYYMMDD_HHMMSS.log`
+- **Log rotation**: Automatically deletes logs older than 30 days and keeps only the 10 most recent files
+- **Error logs**: `run_start.log` files are moved to `logs/` if startup errors occur
+- **View logs**: Run `view_logs.bat` to see the most recent batch log
+- **Scheduler troubleshooting**: Check these logs when tasks appear stuck
+
+The batch logs include:
+- Startup validation (config file, Python installation)
+- Database status checks
+- Python script output (stdout/stderr)
+- Exit codes and completion status
+- Timestamps for all operations
+
+### Manual Log Viewing
+
+```bash
+# View most recent batch log
+view_logs.bat
+
+# View Python application logs
+type logs\gpo_generator.log
+
+# View all log files
+dir logs\ /b
+```
+
 ## Error Handling
 
 - SMTP alerts sent for server polling failures
@@ -79,4 +109,5 @@ Logs are written to `logs/gpo_generator.log` with rotation every 30 days (config
 - `poll_printers.ps1` - PowerShell polling script
 - `printers.db` - SQLite database
 - `logs/` - Log directory
-- `run.bat` - Windows batch runner
+- `run.bat` - Windows batch runner (with logging)
+- `view_logs.bat` - Log viewer for batch script output

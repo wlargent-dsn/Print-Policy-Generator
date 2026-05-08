@@ -31,7 +31,8 @@ class Database:
 
     def _init_db(self):
         """Initialize database tables if they don't exist."""
-        with sqlite3.connect(self.db_path) as conn:
+        # Use timeout to prevent hanging if database is locked
+        with sqlite3.connect(self.db_path, timeout=30.0) as conn:
             cursor = conn.cursor()
 
             # Settings table for global config like CLSID
@@ -62,7 +63,7 @@ class Database:
 
     def get_clsid(self) -> str:
         """Get or generate the CLSID for the GPO."""
-        with sqlite3.connect(self.db_path) as conn:
+        with sqlite3.connect(self.db_path, timeout=30.0) as conn:
             cursor = conn.cursor()
             cursor.execute('SELECT value FROM settings WHERE key = ?', ('clsid',))
             result = cursor.fetchone()
@@ -78,7 +79,7 @@ class Database:
 
     def get_all_printers(self) -> List[Printer]:
         """Get all printers from database."""
-        with sqlite3.connect(self.db_path) as conn:
+        with sqlite3.connect(self.db_path, timeout=30.0) as conn:
             cursor = conn.cursor()
             cursor.execute('SELECT * FROM printers ORDER BY printer_name')
             rows = cursor.fetchall()
@@ -101,7 +102,7 @@ class Database:
 
     def get_printer_by_name(self, printer_name: str) -> Optional[Printer]:
         """Get a printer by name."""
-        with sqlite3.connect(self.db_path) as conn:
+        with sqlite3.connect(self.db_path, timeout=30.0) as conn:
             cursor = conn.cursor()
             cursor.execute('SELECT * FROM printers WHERE printer_name = ?', (printer_name,))
             row = cursor.fetchone()
@@ -127,7 +128,7 @@ class Database:
         uid = str(uuid.uuid4()).upper()
         now = datetime.now().isoformat()
 
-        with sqlite3.connect(self.db_path) as conn:
+        with sqlite3.connect(self.db_path, timeout=30.0) as conn:
             cursor = conn.cursor()
             cursor.execute('''
                 INSERT INTO printers (server_hostname, adds_site, clsid, printer_name,
@@ -168,7 +169,7 @@ class Database:
 
         query = f'UPDATE printers SET {", ".join(updates)} WHERE printer_name = ?'
 
-        with sqlite3.connect(self.db_path) as conn:
+        with sqlite3.connect(self.db_path, timeout=30.0) as conn:
             cursor = conn.cursor()
             cursor.execute(query, params)
             conn.commit()
@@ -176,7 +177,7 @@ class Database:
 
     def delete_printer(self, printer_name: str) -> bool:
         """Delete a printer. Returns True if deleted."""
-        with sqlite3.connect(self.db_path) as conn:
+        with sqlite3.connect(self.db_path, timeout=30.0) as conn:
             cursor = conn.cursor()
             cursor.execute('DELETE FROM printers WHERE printer_name = ?', (printer_name,))
             conn.commit()
@@ -184,7 +185,7 @@ class Database:
 
     def get_printer_names(self) -> List[str]:
         """Get list of all printer names in DB."""
-        with sqlite3.connect(self.db_path) as conn:
+        with sqlite3.connect(self.db_path, timeout=30.0) as conn:
             cursor = conn.cursor()
             cursor.execute('SELECT printer_name FROM printers ORDER BY printer_name')
             return [row[0] for row in cursor.fetchall()]

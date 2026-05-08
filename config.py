@@ -30,10 +30,17 @@ class Config:
             if section not in config:
                 raise ValueError(f"Missing required configuration section: {section}")
 
-        # Load site mappings
-        self.site_mappings: Dict[str, str] = config['site_mappings']
+        # Load site mappings (site -> list of prefixes)
+        self.site_mappings: Dict[str, List[str]] = config['site_mappings']
         if not isinstance(self.site_mappings, dict):
             raise ValueError("site_mappings must be a dictionary")
+        # Validate each site maps to a list of prefixes
+        for site, prefixes in self.site_mappings.items():
+            if isinstance(prefixes, str):
+                # Convert single string to list for backward compatibility
+                self.site_mappings[site] = [prefixes]
+            elif not isinstance(prefixes, list):
+                raise ValueError(f"site_mappings['{site}'] must be a string or list of strings")
 
         # Load print servers
         self.print_servers: List[str] = config['print_servers']
@@ -88,8 +95,9 @@ class Config:
             return self.printer_overrides[printer_name]
 
         # Check prefix mappings
-        for site, prefix in self.site_mappings.items():
-            if printer_name.startswith(prefix):
-                return site
+        for site, prefixes in self.site_mappings.items():
+            for prefix in prefixes:
+                if printer_name.startswith(prefix):
+                    return site
 
         return None  # No matching site found

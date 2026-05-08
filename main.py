@@ -153,20 +153,26 @@ def generate_gpo_xml(db: Database, config: Config, logger) -> str:
 def main():
     """Main execution function."""
     # Set timeout to 5 minutes (300 seconds) to prevent hanging
-    if sys.platform != 'win32':
+    # Note: SIGALRM is Unix-only, skip on Windows
+    if hasattr(signal, 'SIGALRM'):
         signal.signal(signal.SIGALRM, timeout_handler)
         signal.alarm(300)
     
     try:
-        # Load configuration
+        # Load configuration with early error handling (before logging)
+        print("[STARTUP] Loading configuration...", file=sys.stderr, flush=True)
         config = Config()
+        print(f"[STARTUP] Config loaded successfully", file=sys.stderr, flush=True)
 
         # Setup logging
         logger = setup_logging(config)
         logger.info("Starting Automatic Print GPO Generator")
 
-        # Initialize database
+        # Initialize database with error handling
+        print("[STARTUP] Initializing database...", file=sys.stderr, flush=True)
         db = Database()
+        print("[STARTUP] Database initialized successfully", file=sys.stderr, flush=True)
+        logger.info("Database initialized successfully")
 
         # Poll all servers
         all_polls_successful = True
@@ -205,13 +211,15 @@ def main():
 
     except Exception as e:
         # Fatal error - couldn't even start properly
-        print(f"Fatal error: {e}", file=sys.stderr)
+        error_msg = f"Fatal error: {type(e).__name__}: {e}"
+        print(f"[STARTUP-ERROR] {error_msg}", file=sys.stderr, flush=True)
+        print(f"[STARTUP-ERROR] Check that config.yaml exists and printers.db is not locked", file=sys.stderr, flush=True)
         # Can't send alert here as config might not be loaded
         sys.exit(1)
     
     finally:
-        # Clear timeout alarm on non-Windows systems
-        if sys.platform != 'win32':
+        # Clear timeout alarm on systems that support it
+        if hasattr(signal, 'SIGALRM'):
             signal.alarm(0)
 
 

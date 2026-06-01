@@ -9,6 +9,7 @@ import subprocess
 import sys
 import fnmatch
 import signal
+import time
 from datetime import datetime
 from typing import List, Dict, Any
 from config import Config
@@ -150,6 +151,16 @@ def generate_gpo_xml(db: Database, config: Config, logger) -> str:
     return full_xml
 
 
+def write_xml_to_file(xml_content: str, config: Config):
+    """Write XML content to file."""
+    try:
+        with open(config.gpo_xml_path, 'w', encoding='utf-8') as f:
+            f.write(xml_content)
+        return True
+    
+    except Exception as e:
+        return {e}
+
 def main():
     """Main execution function."""
     # Set timeout to 5 minutes (300 seconds) to prevent hanging
@@ -188,19 +199,25 @@ def main():
 
         # Generate XML if we have data or if polls failed (use DB as authoritative)
         try:
-            xml_content = generate_gpo_xml(db, config, logger)
+            for i in range(3):  # Retry up to 3 times if XML generation fails
+                xml_content = generate_gpo_xml(db, config, logger)
+                writeResponse = write_xml_to_file(xml_content, config)
 
-            # Write to file
-            with open(config.gpo_xml_path, 'w', encoding='utf-8') as f:
-                f.write(xml_content)
+                if writeResponse == True:
+                    logger.info(f"GPO XML written to {config.gpo_xml_path}")
+                    break  # Success
 
-            logger.info(f"GPO XML written to {config.gpo_xml_path}")
+                if i >= 2:
+                    raise Exception(writeResponse)
+                
+                logger.warning(f"Failed to write XML to file: {writeResponse}. Retrying ({i+1}/3)...")
+                time.sleep(i*10)  # Wait before retrying
 
         except Exception as e:
             logger.error(f"Failed to generate GPO XML: {e}")
             send_smtp_alert(config, "GPO Generator: XML Generation Failed",
-                          f"Failed to generate GPO XML: {e}", logger)
-            sys.exit(1)
+                            f"Failed to generate GPO XML: {e}", logger)
+            sys.exit(1)  # Fatal error - can't generate XML
 
         # Check for fatal errors
         if not all_polls_successful:

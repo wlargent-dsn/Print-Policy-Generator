@@ -89,7 +89,7 @@ def update_database_from_poll(db: Database, config: Config, server_data: List[Di
                 existing.server_hostname != printer_data['hostname'] or
                 existing.printer_ip != printer_data['ip'] or
                 existing.printer_unc != printer_data['unc'] or
-                (existing.adds_site != site and existing.printer_name != printer_name)  # Site redetermination on name change
+                existing.adds_site != site
             )
 
             if needs_update:

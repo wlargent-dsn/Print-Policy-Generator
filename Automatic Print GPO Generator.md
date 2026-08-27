@@ -104,7 +104,7 @@ printer_overrides:
      - Determine ADDS site from name prefix or override
      - If new: insert with generated UID
      - If existing: check for changes (IP, UNC, hostname), update if needed
-     - If site changed (e.g., name change): redetermine ADDS site
+   - If the configured site changed: update the ADDS site filter
    - Remove printers no longer on server
 
 5. **Generate GPO XML**
@@ -143,7 +143,7 @@ printer_overrides:
 - PowerShell API for Windows print server queries
 - Multi-server support
 - New printer detection (insert with new UID)
-- Change detection (update on IP/UNC change)
+- Change detection (update on server, IP, UNC, or configured site change)
 - Removal detection (delete when no longer on server)
 
 ✅ **XML Generation**
@@ -195,7 +195,7 @@ Updates trigger when:
 - Server hostname differs
 - Printer IP differs
 - Printer UNC differs
-- Printer name changed (triggers site redetermination)
+- Configured ADDS site differs
 
 ### Removed Printers
 - Deleted from database when no longer present on polled server
